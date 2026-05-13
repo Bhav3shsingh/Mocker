@@ -16,67 +16,22 @@
         </div>
     </div>
 
-    <!-- Hidden Slide-out Menu -->
+    <!-- Slide-out Menu (For Credits & Footer) -->
     <div id="side-menu" class="side-menu">
         <div class="menu-header">Mocker Control Center</div>
         
-        <div id="initial-menu" class="menu-state">
-            <!-- Instructions Section -->
-            <div class="how-to-use">
-                <p class="section-label">HOW TO USE MOCKER</p>
-                <ol class="step-list">
-                    <li>Open the <strong><a href="https://gemini.google.com/gem/1-yZgHKfw5VfcSRG9ODM2SF3COsaLreBZ?usp=sharing" target="_blank" style="color: var(--review);">Mocker Feeder Gem</a></strong>.</li>
-                    <li>Upload your syllabus, topic, or notes to the Gem.</li>
-                    <li>Copy the <strong>JSON code</strong> the Gem gives you.</li>
-                    <li>Click <strong>Load Questions</strong> below and paste that code into <strong>TEXT_POWER</strong>.</li>
-                    <li>Hit <strong>EXECUTE_SYNC</strong> to start your test.</li>
-                </ol>
-            </div>
+        <!-- NEW TEST / RESET ACTION -->
+        <button id="new-test-btn" class="menu-item reset-action" style="background: var(--unanswered); color: white; border: none; margin-bottom: 20px;">♻️ New Test (Reset)</button>
 
-            <button id="open-feeder" class="menu-item" style="margin-top: 15px;">⚙️ Load Questions</button>
-            
-            <!-- Legend Section -->
-            <div class="legend-section">
-                <p class="section-label">EXAM_LEGEND</p>
-                <div class="legend-item"><div class="legend-box grey"></div> Unvisited</div>
-                <div class="legend-item"><div class="legend-box red-down"></div> Unanswered</div>
-                <div class="legend-item"><div class="legend-box green-up"></div> Answered</div>
-                <div class="legend-item"><div class="legend-box purple-circle"></div> Marked for Review</div>
-                <div class="legend-item"><div class="legend-box purple-tick"></div> Answered & Review</div>
-                
-                <p class="section-label" style="margin-top: 15px;">REVIEW_LEGEND</p>
-                <div class="legend-item"><div class="legend-box green-sq"></div> Correct</div>
-                <div class="legend-item"><div class="legend-box red-sq"></div> Wrong</div>
-                <div class="legend-item"><div class="legend-box grey-sq"></div> Skipped</div>
-            </div>
+        <div class="menu-footer">
+            © 2026 1Power Park | <a href="https://www.instagram.com/bhavezh_yt/" target="_blank" style="color: inherit; text-decoration: underline; font-size:small;">BHAVESHSINGH</a><br><br>
+            Version 1.1.1
         </div>
-
-        <div id="feeder-controls" class="menu-state" style="display: none;">
-            <div class="feeder-section">
-                <p class="section-label">1. SET_LIMIT (MINUTES)</p>
-                <input type="number" id="timer-minutes-input" value="60" min="1" class="side-input">
-
-                <p class="section-label">2. TEXT_POWER (JSON)</p>
-                <textarea id="json-text-input" placeholder='Paste JSON from Gem here...' class="side-textarea"></textarea>
-                
-                <div class="divider"><span>OR</span></div>
-                
-                <p class="section-label">3. UPLOAD_POWER</p>
-                <input type="file" id="json-file-input" accept=".json" class="side-input">
-                
-                <div class="feeder-actions" style="margin-top: 20px;">
-                    <button id="apply-feeder" class="execute-btn">EXECUTE_SYNC</button>
-                    <button id="back-to-menu" class="back-btn">← Back</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="menu-footer">Version 1.0.4</div>
     </div>
 
     <div class="test-container">
-        <!-- Left Sidebar -->
-        <aside class="question-palette">
+        <!-- Left Sidebar (Hidden until Sync) -->
+        <aside class="question-palette" id="main-palette" style="display: none;">
             <div class="palette-header">
                 <h3>Question Palette</h3>
                 <div id="score-badge" class="score-display" style="display: none;">
@@ -86,32 +41,68 @@
             <div id="palette-grid" class="grid"></div>
         </aside>
 
-        <!-- Right Side -->
+        <!-- Main Viewer -->
         <main class="question-viewer">
-            <div class="viewer-header">
-                <div class="timer-container">
-                    <span class="timer-icon">⏳</span>
-                    <span id="timer-clock">00:00</span>
+            <!-- SETUP / WELCOME SCREEN (Shown on load) -->
+            <div id="welcome-screen">
+                <div class="welcome-card">
+                    <h1 class="welcome-title">Mocker Sync Engine</h1>
+                    
+                    <div class="setup-grid">
+                        <div class="setup-left">
+                            <p class="section-label">HOW TO USE</p>
+                            <ol class="step-list">
+                                <li>Open <strong><a href="https://gemini.google.com/gem/1-yZgHKfw5VfcSRG9ODM2SF3COsaLreBZ?usp=sharing" target="_blank">Mocker Feeder Gem</a></strong>.</li>
+                                <li>Upload notes or topics to the Gem.</li>
+                                <li>Copy the **JSON code** provided.</li>
+                                <li>Paste it into **TEXT_POWER** on the right.</li>
+                                <li>Hit **EXECUTE_SYNC** to start.</li>
+                            </ol>
+                        </div>
+
+                        <div class="setup-right">
+                            <p class="section-label">1. SET_LIMIT (MINUTES)</p>
+                            <input type="number" id="timer-minutes-input" value="60" min="1" class="setup-input">
+
+                            <p class="section-label">2. TEXT_POWER (JSON)</p>
+                            <textarea id="json-text-input" placeholder="Paste JSON from Gem here..." class="setup-textarea"></textarea>
+                            
+                            <p class="section-label">3. OR UPLOAD FILE</p>
+                            <input type="file" id="json-file-input" accept=".json" class="setup-input">
+
+                            <button id="apply-feeder" class="execute-btn">EXECUTE_SYNC</button>
+                        </div>
+                    </div>
                 </div>
-                <button id="submit-test-btn" class="submit-btn">SUBMIT_TEST</button>
-                <div id="review-indicator" class="review-status-tag" style="display: none;">REVIEW_MODE</div>
             </div>
 
-            <div id="question-display">
-                <div id="q-title">
-                    <div class="q-number-label">INIT_SEQ</div>
-                    <div class="q-text-body">Select a question to begin.</div>
+            <!-- TEST INTERFACE (Hidden until Sync) -->
+            <div id="test-interface" style="display: none;">
+                <div class="viewer-header">
+                    <div class="timer-container">
+                        <span class="timer-icon">⏳</span>
+                        <span id="timer-clock">00:00</span>
+                    </div>
+                    <button id="submit-test-btn" class="submit-btn">SUBMIT_TEST</button>
+                    <div id="review-indicator" class="review-status-tag" style="display: none;">REVIEW_MODE</div>
                 </div>
-                <div id="options-container" class="options-stack"></div>
-            </div>
 
-            <footer class="controls">
-                <button id="prev-btn" class="nav-btn">Previous</button>
-                <button id="next-btn" class="nav-btn">Next</button>
-                <label class="review-label">
-                    <input type="checkbox" id="review-tick"> Mark for Review
-                </label>
-            </footer>
+                <div id="question-display">
+                    <div id="q-title">
+                        <div class="q-number-label">INIT_SEQ</div>
+                        <div class="q-text-body">Syncing complete. Select a question.</div>
+                    </div>
+                    <div id="options-container" class="options-stack"></div>
+                </div>
+
+                <footer class="controls">
+                    <button id="prev-btn" class="nav-btn">Previous</button>
+                    <button id="next-btn" class="nav-btn">Next</button>
+                    <label class="review-label">
+                        <input type="checkbox" id="review-tick"> Mark for Review
+                    </label>
+                </footer>
+            </div>
         </main>
     </div>
 
