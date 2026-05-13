@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <title>Mocker</title>
     <link rel="stylesheet" href="style.css">
+    <!-- MathJax for High Complexity Math Rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -96,11 +111,15 @@
                     <div id="review-indicator" class="review-status-tag" style="display: none;">REVIEW_MODE</div>
                 </div>
 
-                <div id="question-display">
+                <div id="question-display" class="tex2jax_process">
                     <div id="q-title">
                         <div class="q-number-label">INIT_SEQ</div>
                         <div class="q-text-body">Syncing complete. Select a question.</div>
                     </div>
+                    
+                    <!-- NEW: IMAGE CONTAINER FOR DIAGRAMS/STRUCTURES -->
+                    <div id="q-image-container" style="margin: 20px 0; display: none; text-align: center;"></div>
+                    
                     <div id="options-container" class="options-stack"></div>
                 </div>
 
@@ -115,6 +134,6 @@
         </main>
     </div>
 
-    <script src="script.js"></script> 
+    <script src="script.js"></script>
 </body>
 </html>
