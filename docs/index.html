@@ -16,12 +16,21 @@
         </div>
     </div>
 
-    <!-- Slide-out Menu (For Credits & Footer) -->
+    <!-- Hidden Slide-out Menu -->
     <div id="side-menu" class="side-menu">
         <div class="menu-header">Mocker Control Center</div>
         
         <!-- NEW TEST / RESET ACTION -->
-        <button id="new-test-btn" class="menu-item reset-action" style="background: var(--unanswered); color: white; border: none; margin-bottom: 20px;">♻️ New Test (Reset)</button>
+        <button id="new-test-btn" class="menu-item reset-action" style="background: var(--unanswered); color: white; border: none; margin-bottom: 20px; width: 100%; padding: 14px; border-radius: 8px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">♻️ New Test (Reset)</button>
+
+        <!-- SUPPORT & COLLABORATION SECTION -->
+        <div class="support-section" style="margin-top:100px;margin-bottom: 50px; padding: 10px 0;">
+            <p class="section-label" style="font-size: 0.70rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px;">Support & Collaboration</p>
+            <div class="contact-card" style="display: flex; align-items: center; gap: 12px; background: var(--bg-main); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); transition: border-color 0.2s;">
+                <span style="font-size: 1.1rem;">✉️</span>
+                <a href="mailto:1powerpark@gmail.com" style="color: var(--text-main); text-decoration: none; font-size: 0.82rem; font-weight: 700; font-family: 'Fira Code', monospace; word-break: break-all;">1powerpark@gmail.com</a>
+            </div>
+        </div>
 
         <div class="menu-footer">
             © 2026 1Power Park | <a href="https://www.instagram.com/bhavezh_yt/" target="_blank" style="color: inherit; text-decoration: underline; font-size:small;">BHAVESHSINGH</a><br><br>
@@ -54,9 +63,9 @@
                             <ol class="step-list">
                                 <li>Open <strong><a href="https://gemini.google.com/gem/1-yZgHKfw5VfcSRG9ODM2SF3COsaLreBZ?usp=sharing" target="_blank">Mocker Feeder Gem</a></strong>.</li>
                                 <li>Upload notes or topics to the Gem.</li>
-                              <li>Copy the <b>JSON code</b> provided.</li>
-                              <li>Paste it into <b>TEXT POWER</b> on the right.</li>
-                              <li>Hit <b>START TEST</b> to start.</li>
+                                <li>Copy the <b>JSON code</b> provided.</li>
+                                <li>Paste it into <b>TEXT POWER</b> on the right.</li>
+                                <li>Hit <b>START TEST</b> to start.</li>
                             </ol>
                         </div>
 
@@ -83,8 +92,8 @@
                         <span class="timer-icon">⏳</span>
                         <span id="timer-clock">00:00</span>
                     </div>
-                    <button id="submit-test-btn" class="submit-btn">SUBMIT TEST</button>
-                    <div id="review-indicator" class="review-status-tag" style="display: none;">REVIEW MODE</div>
+                    <button id="submit-test-btn" class="submit-btn">SUBMIT_TEST</button>
+                    <div id="review-indicator" class="review-status-tag" style="display: none;">REVIEW_MODE</div>
                 </div>
 
                 <div id="question-display">
@@ -106,6 +115,6 @@
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js"></script> 
 </body>
 </html>
