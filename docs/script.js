@@ -93,7 +93,11 @@ function processAndLoad(raw) {
             throw new Error("No valid JSON array detected.");
         }
 
-        const jsonString = raw.substring(startIndex, endIndex + 1);
+        let jsonString = raw.substring(startIndex, endIndex + 1);
+
+        // --- MECHANICAL GRIT: Strip trailing commas to prevent SYNC_FAILED ---
+        jsonString = jsonString.replace(/,[ \t\r\n]*([\]}])/g, '$1');
+
         const data = JSON.parse(jsonString);
 
         if (!Array.isArray(data)) {
@@ -103,7 +107,8 @@ function processAndLoad(raw) {
         questions = data.map((q, i) => ({
             id: i + 1,
             text: q.text || `Question ${i + 1}`,
-            options: q.options || ["Option A", "Option B", "Option C", "Option D"],
+            image: q.image || null, // Capture diagram URLs if provided separately
+            options: q.options || ["A", "B", "C", "D"],
             correct: q.correct !== undefined ? q.correct : null, 
             status: 'unvisited',
             selectedOption: null
@@ -119,11 +124,14 @@ function processAndLoad(raw) {
         const userMins = document.getElementById('timer-minutes-input').value || 60;
         timeLeft = parseInt(userMins) * 60; 
         
-        saveToLocal(); // Initialize first save
+        saveToLocal(); 
         init(); 
+        
+        sideMenu.classList.remove('active');
 
     } catch (err) {
-        alert("SYNC_FAILED: Check your JSON format.");
+        console.error("Sync Error Details:", err);
+        alert("SYNC_FAILED: Invalid format. Ensure double-escaped backslashes and correct brackets.");
     }
 }
 
@@ -161,10 +169,32 @@ function loadQuestion(index) {
     
     if (!isReviewMode && q.status === 'unvisited') q.status = 'unanswered';
     
-    document.getElementById('q-title').innerHTML = `
-        <div class="q-number-label">Question No. ${q.id}</div>
-        <div class="q-text-body">${q.text}</div>
-    `;
+    // --- SMART IMAGE EXTRACTION (Regex) ---
+    const imgContainer = document.getElementById('q-image-container');
+    const markdownImageRegex = /!\[.*?\]\((.*?)\)/;
+    const match = q.text.match(markdownImageRegex);
+    
+    let displayBody = q.text;
+    let imageUrl = q.image;
+
+    // If no explicit image key exists, try to extract from Markdown in text
+    if (!imageUrl && match && match[1]) {
+        imageUrl = match[1];
+        // Clean the raw Markdown tag out of the display text
+        displayBody = q.text.replace(markdownImageRegex, '').trim();
+    }
+
+    // Update UI Headers
+    document.querySelector('.q-number-label').innerText = `Question No. ${q.id}`;
+    document.querySelector('.q-text-body').innerHTML = displayBody;
+
+    // Apply extracted or direct image
+    if (imageUrl) {
+        imgContainer.innerHTML = `<img src="${imageUrl}" alt="Diagram">`;
+        imgContainer.style.display = 'block';
+    } else {
+        imgContainer.style.display = 'none';
+    }
 
     const container = document.getElementById('options-container');
     container.innerHTML = q.options.map((opt, i) => {
@@ -189,6 +219,11 @@ function loadQuestion(index) {
     
     renderPalette();
     updateTimerUI();
+
+    // Trigger MathJax to render LaTeX equations
+    if (window.MathJax) {
+        MathJax.typesetPromise();
+    }
 }
 
 function selectOption(optIndex) {
@@ -279,12 +314,9 @@ window.onbeforeunload = function() {
     }
 };
 
-// --- RESET / NEW TEST LOGIC ---
 document.getElementById('new-test-btn').onclick = () => {
     if (confirm("This will clear all current progress and data. Start a new session?")) {
-        // Clear local storage so it doesn't ask to resume
         localStorage.removeItem('mocker_session');
-        // Force reload the page
         window.location.reload();
     }
 };
