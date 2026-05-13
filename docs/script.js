@@ -3,14 +3,32 @@ let isReviewMode = false;
 let currentIdx = 0;
 let timeLeft = 60 * 60; 
 let timerInterval;
+let questions = []; 
+
+// --- PERSISTENCE LOGIC (LOCAL STORAGE) ---
+function saveToLocal() {
+    if (questions.length === 0) return;
+    const sessionData = {
+        questions,
+        timeLeft,
+        currentIdx,
+        isReviewMode
+    };
+    localStorage.setItem('mocker_session', JSON.stringify(sessionData));
+}
+
+function clearLocal() {
+    localStorage.removeItem('mocker_session');
+}
 
 // --- TIMER LOGIC ---
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
-    if (isReviewMode) return; // No timer in review mode
+    if (isReviewMode) return; 
 
     timerInterval = setInterval(() => {
         timeLeft--;
+        if (timeLeft % 5 === 0) saveToLocal(); // Auto-save every 5 seconds
         updateTimerUI();
 
         if (timeLeft <= 0) {
@@ -22,6 +40,8 @@ function startTimer() {
 
 function updateTimerUI() {
     const clockDisplay = document.getElementById('timer-clock');
+    if (!clockDisplay) return;
+
     if (isReviewMode) {
         clockDisplay.innerText = "REVIEW";
         clockDisplay.style.color = "var(--review)";
@@ -44,19 +64,17 @@ function finishTest(reason) {
     clearInterval(timerInterval);
     isReviewMode = true; 
 
-    // Calculate Score
     const total = questions.length;
     const correctCount = questions.filter(q => q.selectedOption === q.correct).length;
     const answered = questions.filter(q => q.selectedOption !== null).length;
 
-    // UI Updates
     document.getElementById('submit-test-btn').style.display = 'none';
-    document.querySelector('.test-container').style.pointerEvents = 'auto';
-    document.querySelector('.test-container').style.opacity = '1';
+    document.getElementById('review-indicator').style.display = 'block';
 
+    saveToLocal(); // Save final state
     alert(`${reason}\n\nReview Mode Active.\nScore: ${correctCount} / ${total}\nAnswered: ${answered}`);
 
-    loadQuestion(0); // Restart at Q1 for review
+    loadQuestion(0); 
 }
 
 document.getElementById('submit-test-btn').onclick = () => {
@@ -68,7 +86,20 @@ document.getElementById('submit-test-btn').onclick = () => {
 // --- DATA INJECTION LOGIC ---
 function processAndLoad(raw) {
     try {
-        const data = JSON.parse(raw);
+        const startIndex = raw.indexOf('[');
+        const endIndex = raw.lastIndexOf(']');
+
+        if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+            throw new Error("No valid JSON array detected.");
+        }
+
+        const jsonString = raw.substring(startIndex, endIndex + 1);
+        const data = JSON.parse(jsonString);
+
+        if (!Array.isArray(data)) {
+            throw new Error("Pasted content is not an array.");
+        }
+
         questions = data.map((q, i) => ({
             id: i + 1,
             text: q.text || `Question ${i + 1}`,
@@ -78,35 +109,25 @@ function processAndLoad(raw) {
             selectedOption: null
         }));
         
+        // UI Transitions
+        document.getElementById('welcome-screen').style.display = 'none';
+        document.getElementById('test-interface').style.display = 'block';
+        document.getElementById('main-palette').style.display = 'block';
+
         isReviewMode = false;
         currentIdx = 0; 
         const userMins = document.getElementById('timer-minutes-input').value || 60;
         timeLeft = parseInt(userMins) * 60; 
-
-        document.querySelector('.test-container').style.pointerEvents = 'auto';
-        document.querySelector('.test-container').style.opacity = '1';
-        document.getElementById('submit-test-btn').style.display = 'block';
         
+        saveToLocal(); // Initialize first save
         init(); 
-        
-        sideMenu.classList.remove('active');
-        feederControls.style.display = 'none';
-        initialMenu.style.display = 'block';
+
     } catch (err) {
-        alert("JSON Error: Check your format.");
+        alert("SYNC_FAILED: Check your JSON format.");
     }
 }
 
 // --- CORE MOCK LOGIC ---
-let questions = Array.from({ length: 5 }, (_, i) => ({
-    id: i + 1,
-    text: `Sample Question #${i + 1}: What is 1 + ${i}?`,
-    options: [`${1+i}`, "5", "10", "2"],
-    correct: 0,
-    status: 'unvisited',
-    selectedOption: null
-}));
-
 function init() {
     renderPalette();
     loadQuestion(currentIdx);
@@ -115,17 +136,17 @@ function init() {
 
 function renderPalette() {
     const grid = document.getElementById('palette-grid');
+    if (!grid) return;
     grid.innerHTML = ''; 
+    
     questions.forEach((q, i) => {
         const div = document.createElement('div');
-        
         let stateClass = q.status;
         if (isReviewMode) {
             if (q.selectedOption === null) stateClass = "skipped";
             else if (q.selectedOption === q.correct) stateClass = "correct-mini";
             else stateClass = "wrong-mini";
         }
-
         div.className = `q-box ${stateClass}`;
         div.innerText = q.id;
         div.onclick = () => loadQuestion(i);
@@ -157,8 +178,8 @@ function loadQuestion(index) {
             <div class="option-item ${reviewClass}" ${isReviewMode ? '' : `onclick="selectOption(${i})"`}>
                 <input type="radio" name="opt" ${q.selectedOption === i ? 'checked' : ''} ${isReviewMode ? 'disabled' : ''}>
                 <span>${opt}</span>
-                ${isReviewMode && i === q.correct ? '<span class="feedback-tag">CORRECT</span>' : ''}
-                ${isReviewMode && q.selectedOption === i && i !== q.correct ? '<span class="feedback-tag">WRONG</span>' : ''}
+                ${isReviewMode && i === q.correct ? '<span class="feedback-tag" style="background: var(--answered)">CORRECT</span>' : ''}
+                ${isReviewMode && q.selectedOption === i && i !== q.correct ? '<span class="feedback-tag" style="background: var(--unanswered)">WRONG</span>' : ''}
             </div>
         `;
     }).join('');
@@ -173,10 +194,10 @@ function loadQuestion(index) {
 function selectOption(optIndex) {
     if (isReviewMode) return;
     questions[currentIdx].selectedOption = optIndex;
-    
     const isMarkedReview = (questions[currentIdx].status === 'review' || questions[currentIdx].status === 'answered-review');
     questions[currentIdx].status = isMarkedReview ? 'answered-review' : 'answered';
     
+    saveToLocal();
     loadQuestion(currentIdx);
 }
 
@@ -190,6 +211,7 @@ document.getElementById('review-tick').onchange = (e) => {
     } else {
         q.status = isAnswered ? 'answered' : 'unanswered';
     }
+    saveToLocal();
     renderPalette();
 };
 
@@ -201,21 +223,45 @@ document.getElementById('prev-btn').onclick = () => {
     if (currentIdx > 0) loadQuestion(currentIdx - 1);
 };
 
-// --- MENU TOGGLES ---
+// --- RESTORE SESSION ON LOAD ---
+window.onload = () => {
+    const saved = localStorage.getItem('mocker_session');
+    if (saved) {
+        const data = JSON.parse(saved);
+        if (confirm("Previous session found. Resume test?")) {
+            questions = data.questions;
+            timeLeft = data.timeLeft;
+            currentIdx = data.currentIdx;
+            isReviewMode = data.isReviewMode;
+
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('test-interface').style.display = 'block';
+            document.getElementById('main-palette').style.display = 'block';
+            
+            if (isReviewMode) {
+                document.getElementById('submit-test-btn').style.display = 'none';
+                document.getElementById('review-indicator').style.display = 'block';
+            }
+            
+            init();
+        } else {
+            clearLocal();
+        }
+    }
+};
+
+// --- MENU TOGGLES & ACTIONS ---
 const hamburger = document.getElementById('hamburger');
 const sideMenu = document.getElementById('side-menu');
-const initialMenu = document.getElementById('initial-menu');
-const feederControls = document.getElementById('feeder-controls');
 
 hamburger.onclick = (e) => { e.stopPropagation(); sideMenu.classList.toggle('active'); };
 document.onclick = (e) => { if (!sideMenu.contains(e.target) && e.target !== hamburger) sideMenu.classList.remove('active'); };
-document.getElementById('open-feeder').onclick = () => { initialMenu.style.display = 'none'; feederControls.style.display = 'block'; };
-document.getElementById('back-to-menu').onclick = () => { feederControls.style.display = 'none'; initialMenu.style.display = 'block'; };
 
 const applyFeederBtn = document.getElementById('apply-feeder');
 applyFeederBtn.onclick = () => {
     const fileInput = document.getElementById('json-file-input');
     const textInput = document.getElementById('json-text-input');
+    
     if (fileInput.files.length > 0) {
         const reader = new FileReader();
         reader.onload = (e) => processAndLoad(e.target.result);
@@ -223,8 +269,22 @@ applyFeederBtn.onclick = () => {
     } else if (textInput.value.trim()) {
         processAndLoad(textInput.value.trim());
     } else {
-        alert("Please provide a JSON file or text.");
+        alert("Provide a JSON file or paste text.");
     }
 };
 
-init();
+window.onbeforeunload = function() {
+    if (questions.length > 0 && !isReviewMode) {
+        return "Active test in progress!";
+    }
+};
+
+// --- RESET / NEW TEST LOGIC ---
+document.getElementById('new-test-btn').onclick = () => {
+    if (confirm("This will clear all current progress and data. Start a new session?")) {
+        // Clear local storage so it doesn't ask to resume
+        localStorage.removeItem('mocker_session');
+        // Force reload the page
+        window.location.reload();
+    }
+};
