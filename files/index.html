@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mocker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Hamburger Icon -->
+    <div class="menu-wrapper" id="hamburger">
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+
+    <!-- Hidden Slide-out Menu -->
+    <div id="side-menu" class="side-menu">
+        <div class="menu-header">Mocker Control Center</div>
+        
+        <div id="initial-menu" class="menu-state">
+            <!-- Instructions Section -->
+            <div class="how-to-use">
+                <p class="section-label">HOW TO USE MOCKER</p>
+                <ol class="step-list">
+                    <li>Open the <strong><a href="https://gemini.google.com/gem/1-yZgHKfw5VfcSRG9ODM2SF3COsaLreBZ?usp=sharing" target="_blank" style="color: var(--review);">Mocker Feeder Gem</a></strong>.</li>
+                    <li>Upload your syllabus, topic, or notes to the Gem.</li>
+                    <li>Copy the <strong>JSON code</strong> the Gem gives you.</li>
+                    <li>Click <strong>Load Questions</strong> below and paste that code into <strong>TEXT_POWER</strong>.</li>
+                    <li>Hit <strong>EXECUTE_SYNC</strong> to start your test.</li>
+                </ol>
+            </div>
+
+            <button id="open-feeder" class="menu-item" style="margin-top: 15px;">⚙️ Load Questions</button>
+            
+            <!-- Legend Section -->
+            <div class="legend-section">
+                <p class="section-label">EXAM_LEGEND</p>
+                <div class="legend-item"><div class="legend-box grey"></div> Unvisited</div>
+                <div class="legend-item"><div class="legend-box red-down"></div> Unanswered</div>
+                <div class="legend-item"><div class="legend-box green-up"></div> Answered</div>
+                <div class="legend-item"><div class="legend-box purple-circle"></div> Marked for Review</div>
+                <div class="legend-item"><div class="legend-box purple-tick"></div> Answered & Review</div>
+                
+                <p class="section-label" style="margin-top: 15px;">REVIEW_LEGEND</p>
+                <div class="legend-item"><div class="legend-box green-sq"></div> Correct</div>
+                <div class="legend-item"><div class="legend-box red-sq"></div> Wrong</div>
+                <div class="legend-item"><div class="legend-box grey-sq"></div> Skipped</div>
+            </div>
+        </div>
+
+        <div id="feeder-controls" class="menu-state" style="display: none;">
+            <div class="feeder-section">
+                <p class="section-label">1. SET_LIMIT (MINUTES)</p>
+                <input type="number" id="timer-minutes-input" value="60" min="1" class="side-input">
+
+                <p class="section-label">2. TEXT_POWER (JSON)</p>
+                <textarea id="json-text-input" placeholder='Paste JSON from Gem here...' class="side-textarea"></textarea>
+                
+                <div class="divider"><span>OR</span></div>
+                
+                <p class="section-label">3. UPLOAD_POWER</p>
+                <input type="file" id="json-file-input" accept=".json" class="side-input">
+                
+                <div class="feeder-actions" style="margin-top: 20px;">
+                    <button id="apply-feeder" class="execute-btn">EXECUTE_SYNC</button>
+                    <button id="back-to-menu" class="back-btn">← Back</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-footer">Version 1.0.4</div>
+    </div>
+
+    <div class="test-container">
+        <!-- Left Sidebar -->
+        <aside class="question-palette">
+            <div class="palette-header">
+                <h3>Question Palette</h3>
+                <div id="score-badge" class="score-display" style="display: none;">
+                    Score: <span id="correct-count">0</span>/<span id="total-count">0</span>
+                </div>
+            </div>
+            <div id="palette-grid" class="grid"></div>
+        </aside>
+
+        <!-- Right Side -->
+        <main class="question-viewer">
+            <div class="viewer-header">
+                <div class="timer-container">
+                    <span class="timer-icon">⏳</span>
+                    <span id="timer-clock">00:00</span>
+                </div>
+                <button id="submit-test-btn" class="submit-btn">SUBMIT_TEST</button>
+                <div id="review-indicator" class="review-status-tag" style="display: none;">REVIEW_MODE</div>
+            </div>
+
+            <div id="question-display">
+                <div id="q-title">
+                    <div class="q-number-label">INIT_SEQ</div>
+                    <div class="q-text-body">Select a question to begin.</div>
+                </div>
+                <div id="options-container" class="options-stack"></div>
+            </div>
+
+            <footer class="controls">
+                <button id="prev-btn" class="nav-btn">Previous</button>
+                <button id="next-btn" class="nav-btn">Next</button>
+                <label class="review-label">
+                    <input type="checkbox" id="review-tick"> Mark for Review
+                </label>
+            </footer>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
